@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+  body { color: green; background: black; }
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; background-color: #ffffff; color: #1f1c1b; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; background-color: #ffffff; color: #a0a0a0; border-right: 1px solid #a0a0a0; }
+td.sourceCode { padding-left: 5px; }
+pre, code { color: #1f1c1b; background-color: #ffffff; }
+code > span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code > span.dt { color: #0057ae; } /* DataType */
+code > span.dv { color: #b08000; } /* DecVal */
+code > span.bn { color: #b08000; } /* BaseN */
+code > span.fl { color: #b08000; } /* Float */
+code > span.cn { color: #aa5500; } /* Constant */
+code > span.ch { color: #924c9d; } /* Char */
+code > span.sc { color: #3daee9; } /* SpecialChar */
+code > span.st { color: #bf0303; } /* String */
+code > span.vs { color: #bf0303; } /* VerbatimString */
+code > span.ss { color: #ff5500; } /* SpecialString */
+code > span.im { color: #ff5500; } /* Import */
+code > span.co { color: #898887; } /* Comment */
+code > span.do { color: #607880; } /* Documentation */
+code > span.an { color: #ca60ca; } /* Annotation */
+code > span.cv { color: #0095ff; } /* CommentVar */
+code > span.ot { color: #006e28; } /* Other */
+code > span.fu { color: #644a9b; } /* Function */
+code > span.va { color: #0057ae; } /* Variable */
+code > span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #1f1c1b; } /* Operator */
+code > span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code > span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code > span.pp { color: #006e28; } /* Preprocessor */
+code > span.at { color: #0057ae; } /* Attribute */
+code > span.re { color: #0057ae; } /* RegionMarker */
+code > span.in { color: #b08000; } /* Information */
+code > span.wa { color: #bf0303; } /* Warning */
+code > span.al { color: #bf0303; font-weight: bold; } /* Alert */
+code > span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code > span. { color: #1f1c1b; } /* Normal */
+  </style>
+</head>
+<body>
+<h1 id="comment-créer-un-plugin-pour-le-spider-côté-serveur">Comment créer un plugin pour le Spider côté serveur</h1>
+<h2 id="résumé">Résumé</h2>
+<p>Le Spider implémente un système de plugin très simple. Lorsque le serveur est lancé, il chargera ses plugins au démarrage. Ces plugins font office de middleware entre le serveur et le client et sont appelés lorsque le serveur reçoit ou envoie des données au client. Vous pouvez alors utiliser les données échangées pour en faire tout ce que vous désirez !</p>
+<pre><code>|---------| ----&gt; Plugin ---&gt; |---------|
+| Serveur |                   | Client  |
+|---------| &lt;---- Plugin &lt;--- |---------|</code></pre>
+<h2 id="comment-créer-votre-propre-plugin">Comment créer votre propre plugin ?</h2>
+<p>Le Spider vient avec quelques plugins de base mais bien sûr, cela ne signifie pas que vous ne pouvez pas créer les vôtres. Par exemple, disons que vous souhaitez créer un plugin appellé &quot;MyAwesomePlugin&quot; pour le spider.</p>
+<h3 id="étape-1-créer-le-dossier-et-les-fichiers">Étape #1: Créer le dossier et les fichiers</h3>
+<p>Premièrement, allez dans le répertoire où se situent les sources du Spider. Ensuite, vous devriez voir un dossier &quot;Plugins&quot; où se trouvent tous les plugins. Créez votre propre répertoire avec le nom que vous voulez. Dans ce répertoire, vous devez créer trois fichiers: un fichier avec le code source de votre plugin (.cpp), un fichier header (.hpp) et un Makefile pour compiler ledit code source.</p>
+<pre><code>.
+|-- Keys
+|   |-- ...
+|-- Plugins
+|   |-- IPlugin.hpp
+|   |-- MyAwesomePlugin
+|   |   |-- Makefile
+|   |   |-- MyAwesomePlugin.cpp
+|   |   |-- MyAwesomePlugin.hpp
+|-- ...
+`-- server</code></pre>
+<h3 id="étape-2-créer-le-makefile">Étape #2: Créer le Makefile</h3>
+<p>Le Makefile est une étape importante puisque sans un bon Makefile, vous ne pourrez pas faire fonctionner votre plugin avec le Spider. Il y a quelques règles pour le Makefile: * Le Makefile doit compiler une librairie dynamique:
+<ul>
+  <li>Le Makefile doit compiler une librairie dynamique</li>
+  <li>La librairie générée doit être appelée &quot;splugin_votrenom.so&quot;, par exempl &quot;splugin_my-awesome-plugin.so&quot; </li>
+  <li>La librairie générée doit être placée à la racine du répertoire &quot;Plugins&quot; une fois compilé</li></ul></p>
+<h3 id="étape-3-écrire-le-code">Étape #3: Écrire le code</h3>
+<p>Votre plugin doit implémenter plusieurs choses. Premièrement, remarquez le fichier &quot;IPlugin.hpp&quot; à la racine du répertoire &quot;Plugins&quot;. C'est une interface C++ que votre plugin doit implémenter. De ce fait, votre plugin doit implémenter les fonctions présentes dans cette interface. Ce sont les fonctions qui seront appelées lorsque des données seront reçues ou envoyés du client. Vous n'êtes pas obligé de tout implémenter, si par exemple vous souhaitez que votre plugin n'agisse que lorsque le serveur reçoit des données, mais les fonctions doivent être présentes, même si elles ne font rien. De plus, vous devez implémenter une fonction extern C appelée &quot;createPlugin&quot; qui renvoit une nouvelle instance de votre plugin en IPlugin. C'est ce qui sera appelé pour charger le plugin au démarrage du serveur.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">/* MyAwesomePlugin.hpp */</span>
+
+<span class="pp">#include      </span><span class="im">&quot;../IPlugin.hpp&quot;</span>
+
+<span class="kw">class</span> MyAwesomePlugin  : <span class="kw">public</span> IPlugin {
+  <span class="kw">public</span>:
+    MyAwesomePlugin();
+    ~MyAwesomePlugin();
+    <span class="dt">void</span>        onLoad();
+    <span class="dt">void</span>        onReceiveData();
+    <span class="dt">void</span>        onSendData();
+};</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">/* MyAwesomePlugin.cpp */</span>
+
+<span class="pp">#include        </span><span class="im">&quot;MyAwesomePlugin.hpp&quot;</span>
+
+MyAwesomePlugin::MyAwesomePlugin() {}
+MyAwesomePlugin::~MyAwesomePlugin() {}
+
+<span class="dt">void</span>            MyAwesomePlugin::onLoad() {
+  <span class="co">// Appelé lorsque le plugin est chargé</span>
+}
+
+<span class="dt">void</span>            MyAwesomePlugin::onReceiveData() {
+  <span class="co">// Appelé lorsque la socket du serveur reçoit  des données du client</span>
+}
+
+<span class="dt">void</span>            MyAwesomePlugin::onSendData() {
+  <span class="co">// Appelé lorsque le serveur envoit des données sur la socket du client</span>
+}
+
+<span class="at">extern</span> <span class="st">&quot;C&quot;</span> {
+  IPlugin       *createPlugin() {
+    <span class="cf">return</span> (<span class="kw">new</span> MyAwesomePlugin());
+    <span class="co">// Appelé pour charger le plugin</span>
+  }
+}</code></pre></div>
+<p>Après cela, vous devriez être bon et vous pouvez implémenter toutes les fonctionnalités que vous voulez. Amusez-vous bien !</p>
+</body>
+</html>

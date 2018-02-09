@@ -1,0 +1,10 @@
+﻿  WindowsSocket.cpp
+  Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:
+  - add -D_WIN32_WINNT=0x0501 to the compiler command line; or
+  - add _WIN32_WINNT=0x0501 to your project's Preprocessor Definitions.
+  Assuming _WIN32_WINNT=0x0501 (i.e. Windows XP target).
+  Sender.cpp
+c:\users\louis\documents\cpp_spider\client\consoleapplication7\consoleapplication7\sender.cpp(86): warning C4805: '==' : mélange risqué de type 'WindowsSslSocket::State' et de type 'bool' dans l'opération
+  Génération de code en cours...
+  ConsoleApplication7.vcxproj -> C:\Users\louis\Documents\cpp_spider\client\ConsoleApplication7\Debug\client.exe
+  ConsoleApplication7.vcxproj -> C:\Users\louis\Documents\cpp_spider\client\ConsoleApplication7\Debug\client.pdb (Partial PDB)
